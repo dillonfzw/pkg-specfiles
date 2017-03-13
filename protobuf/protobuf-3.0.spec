@@ -1,13 +1,13 @@
-# Build -python subpackage
-%bcond_without python
-# Build -java subpackage for fedora
-%if 0%{?fedora}
-%bcond_without java
-%else
-%bcond_with java
-%endif
-# Don't require gtest
-%bcond_with gtest
+## Build -python subpackage
+#%bcond_without python
+## Build -java subpackage for fedora
+#%if 0%{?fedora}
+#%bcond_without java
+#%else
+#%bcond_with java
+#%endif
+## Don't require gtest
+#%bcond_with gtest
 
 %global emacs_version %(pkg-config emacs --modversion)
 %global emacs_lispdir %(pkg-config emacs --variable sitepkglispdir)
@@ -24,6 +24,7 @@ Source1:        ftdetect-proto.vim
 Source2:        protobuf-init.el
 Patch0:         protobuf-2.5.0-emacs-24.4.patch
 Patch1:         protobuf-2.5.0-fedora-gtest.patch
+Patch2:         protobuf-3.0.2-easymock.patch
 URL:            https://github.com/google/protobuf
 BuildRequires:  automake autoconf libtool pkgconfig zlib-devel
 BuildRequires:  emacs(bin)
@@ -32,9 +33,9 @@ BuildRequires:  gmock-devel
 %if %{with gtest}
 BuildRequires:  gtest-devel
 %endif
-%if %{with java}
-BuildRequires:  mvn(org.easymock:easymock)
-%endif
+#%if %{with java}
+#BuildRequires:  mvn(org.easymock:easymock)
+#%endif
 
 %description
 Protocol Buffers are a way of encoding structured data in an efficient
@@ -189,6 +190,7 @@ This package contains the API documentation for %{name}-java.
 rm -rf gtest
 %patch1 -p1 -b .gtest
 %endif
+%patch2 -p1 -b .easymock
 chmod 644 examples/*
 %if %{with java}
 %pom_remove_parent java/pom.xml
