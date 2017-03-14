@@ -9,9 +9,11 @@
 ## Don't require gtest
 #%bcond_with gtest
 
+%if %{with emacs}
 %global emacs_version %(pkg-config emacs --modversion)
 %global emacs_lispdir %(pkg-config emacs --variable sitepkglispdir)
 %global emacs_startdir %(pkg-config emacs --variable sitestartdir)
+%endif
 
 Summary:        Protocol Buffers - Google's data interchange format
 Name:           protobuf
@@ -27,15 +29,17 @@ Patch1:         protobuf-2.5.0-fedora-gtest.patch
 Patch2:         protobuf-3.0.2-easymock.patch
 URL:            https://github.com/google/protobuf
 BuildRequires:  automake autoconf libtool pkgconfig zlib-devel
+%if %{with emacs}
 BuildRequires:  emacs(bin)
 BuildRequires:  emacs-el >= 24.1
+%endif
 BuildRequires:  gmock-devel
 %if %{with gtest}
 BuildRequires:  gtest-devel
 %endif
-#%if %{with java}
-#BuildRequires:  mvn(org.easymock:easymock)
-#%endif
+%if %{with java}
+BuildRequires:  mvn(org.easymock:easymock)
+%endif
 
 %description
 Protocol Buffers are a way of encoding structured data in an efficient
@@ -140,6 +144,7 @@ Requires: vim-enhanced
 This package contains syntax highlighting for Google Protocol Buffers
 descriptions in Vim editor
 
+%if %{with emacs}
 %package emacs
 Summary: Emacs mode for Google Protocol Buffers descriptions
 Group: Applications/Editors
@@ -158,6 +163,7 @@ Requires: protobuf-emacs = %{version}
 This package contains the elisp source files for %{pkgname}-emacs
 under GNU Emacs. You do not need to install this package to use
 %{pkgname}-emacs.
+%endif
 
 
 %if %{with java}
@@ -185,7 +191,9 @@ This package contains the API documentation for %{name}-java.
 
 %prep
 %setup -q -n %{name}-%{version}
+%if %{with emacs}
 %patch0 -p1 -b .emacs
+%endif
 %if %{with gtest}
 rm -rf gtest
 %patch1 -p1 -b .gtest
@@ -222,7 +230,9 @@ pushd java
 popd
 %endif
 
+%if %{with emacs}
 emacs -batch -f batch-byte-compile editors/protobuf-mode.el
+%endif
 
 %check
 # Tets is segfaulting on arm
@@ -252,11 +262,13 @@ pushd java
 popd
 %endif
 
+%if %{with emacs}
 mkdir -p $RPM_BUILD_ROOT%{emacs_lispdir}
 mkdir -p $RPM_BUILD_ROOT%{emacs_startdir}
 install -p -m 0644 editors/protobuf-mode.el $RPM_BUILD_ROOT%{emacs_lispdir}
 install -p -m 0644 editors/protobuf-mode.elc $RPM_BUILD_ROOT%{emacs_lispdir}
 install -p -m 0644 %{SOURCE2} $RPM_BUILD_ROOT%{emacs_startdir}
+%endif
 
 
 %post -p /sbin/ldconfig
@@ -315,12 +327,14 @@ install -p -m 0644 %{SOURCE2} $RPM_BUILD_ROOT%{emacs_startdir}
 %{_datadir}/vim/vimfiles/ftdetect/proto.vim
 %{_datadir}/vim/vimfiles/syntax/proto.vim
 
+%if %{with emacs}
 %files emacs
 %{emacs_startdir}/protobuf-init.el
 %{emacs_lispdir}/protobuf-mode.elc
 
 %files emacs-el
 %{emacs_lispdir}/protobuf-mode.el
+%endif
 
 %if %{with java}
 %files java -f java/.mfiles
