@@ -1,7 +1,8 @@
-# Build -python subpackage
-%bcond_without python
-# Build -java subpackage
-%bcond_without java
+## Build -python subpackage
+#%bcond_without python
+#%bcond_without python3
+## Build -java subpackage
+#%bcond_without java
 
 %global emacs_version %(pkg-config emacs --modversion)
 %global emacs_lispdir %(pkg-config emacs --variable sitepkglispdir)
@@ -123,6 +124,7 @@ Provides:       %{name}-python = %{version}-%{release}
 %description -n python2-%{name}
 This package contains Python 2 libraries for Google Protocol Buffers
 
+%if %{with python3}
 %package -n python%{python3_pkgversion}-%{name}
 Summary:        Python 3 bindings for Google Protocol Buffers
 BuildArch:      noarch
@@ -138,6 +140,7 @@ Provides:       %{name}-python3 = %{version}-%{release}
 
 %description -n python%{python3_pkgversion}-%{name}
 This package contains Python 3 libraries for Google Protocol Buffers
+%endif
 %endif
 
 %package vim
@@ -264,7 +267,9 @@ make %{?_smp_mflags}
 %if %{with python}
 pushd python
 %py2_build
+%if %{with python3}
 %py3_build
+%endif
 popd
 %endif
 
@@ -287,9 +292,13 @@ find %{buildroot} -type f -name "*.la" -exec rm -f {} \;
 pushd python
 #python ./setup.py install --root=%{buildroot} --single-version-externally-managed --record=INSTALLED_FILES --optimize=1
 %py2_install
-%py3_install
-find %{buildroot}%{python2_sitelib} %{buildroot}%{python3_sitelib} -name \*.py |
+find %{buildroot}%{python2_sitelib} -name \*.py |
   xargs sed -i -e '1{\@^#!@d}'
+%if %{with python3}
+%py3_install
+find %{buildroot}%{python3_sitelib} -name \*.py |
+  xargs sed -i -e '1{\@^#!@d}'
+%endif
 popd
 %endif
 install -p -m 644 -D %{SOURCE1} %{buildroot}%{_datadir}/vim/vimfiles/ftdetect/proto.vim
@@ -357,11 +366,13 @@ install -p -m 0644 %{SOURCE2} $RPM_BUILD_ROOT%{emacs_startdir}
 %doc python/README.md
 %doc examples/add_person.py examples/list_people.py examples/addressbook.proto
 
+%if %{with python3}
 %files -n python%{python3_pkgversion}-protobuf
 %dir %{python3_sitelib}/google
 %{python3_sitelib}/google/protobuf/
 %{python3_sitelib}/protobuf-%{version}%{?rcver}-py3.?.egg-info/
 %{python3_sitelib}/protobuf-%{version}%{?rcver}-py3.?-nspkg.pth
+%endif
 %doc python/README.md
 %doc examples/add_person.py examples/list_people.py examples/addressbook.proto
 %endif
