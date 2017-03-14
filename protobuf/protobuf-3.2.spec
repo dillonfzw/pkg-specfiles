@@ -4,9 +4,11 @@
 ## Build -java subpackage
 #%bcond_without java
 
+%if %{with emacs}
 %global emacs_version %(pkg-config emacs --modversion)
 %global emacs_lispdir %(pkg-config emacs --variable sitepkglispdir)
 %global emacs_startdir %(pkg-config emacs --variable sitestartdir)
+%endif
 
 #global rcver rc2
 
@@ -25,8 +27,10 @@ Source4:        https://github.com/google/googletest/archive/release-1.7.0.tar.g
 
 BuildRequires:  autoconf
 BuildRequires:  automake
+%if %{with emacs}
 BuildRequires:  emacs(bin)
 BuildRequires:  emacs-el >= 24.1
+%endif
 BuildRequires:  gcc-c++
 BuildRequires:  libtool
 BuildRequires:  pkgconfig
@@ -152,6 +156,7 @@ Requires:       vim-enhanced
 This package contains syntax highlighting for Google Protocol Buffers
 descriptions in Vim editor
 
+%if %{with emacs}
 %package emacs
 Summary:        Emacs mode for Google Protocol Buffers descriptions
 BuildArch:      noarch
@@ -170,6 +175,7 @@ Requires:       protobuf-emacs = %{version}
 This package contains the elisp source files for %{name}-emacs
 under GNU Emacs. You do not need to install this package to use
 %{name}-emacs.
+%endif
 
 
 %if %{with java}
@@ -277,7 +283,9 @@ popd
 %mvn_build -s -- -f java/pom.xml
 %endif
 
+%if %{with emacs}
 emacs -batch -f batch-byte-compile editors/protobuf-mode.el
+%endif
 
 %check
 # TODO: failures; get them fixed and remove || :
@@ -308,11 +316,13 @@ install -p -m 644 -D editors/proto.vim %{buildroot}%{_datadir}/vim/vimfiles/synt
 %mvn_install
 %endif
 
+%if %{with emacs}
 mkdir -p $RPM_BUILD_ROOT%{emacs_lispdir}
 mkdir -p $RPM_BUILD_ROOT%{emacs_startdir}
 install -p -m 0644 editors/protobuf-mode.el $RPM_BUILD_ROOT%{emacs_lispdir}
 install -p -m 0644 editors/protobuf-mode.elc $RPM_BUILD_ROOT%{emacs_lispdir}
 install -p -m 0644 %{SOURCE2} $RPM_BUILD_ROOT%{emacs_startdir}
+%endif
 
 
 %post -p /sbin/ldconfig
@@ -381,12 +391,14 @@ install -p -m 0644 %{SOURCE2} $RPM_BUILD_ROOT%{emacs_startdir}
 %{_datadir}/vim/vimfiles/ftdetect/proto.vim
 %{_datadir}/vim/vimfiles/syntax/proto.vim
 
+%if %{with emacs}
 %files emacs
 %{emacs_startdir}/protobuf-init.el
 %{emacs_lispdir}/protobuf-mode.elc
 
 %files emacs-el
 %{emacs_lispdir}/protobuf-mode.el
+%endif
 
 %if %{with java}
 %files java -f .mfiles-protobuf-java

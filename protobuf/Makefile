@@ -19,11 +19,21 @@ dep_pkgs_build_v3.0 += gmock-devel gtest-devel
 dep_pkgs_build_v3.0 += python python-devel python-setuptools python-google-apputils
 #dep_pkgs_build_v3.0 += maven maven-local maven-plugin-bundle maven-antrun-plugin easymock2
 
-dep_pkgs_build_v3.2 := autoconf automake
-dep_pkgs_build_v3.2 += emacs emacs-el
+
+# epel-rpm-macros is required by protobuf-3.2.spec because:
+# "py2_build" macro:
+# ppc64le rhel7:
+# CFLAGS="-O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mcpu=power8 -mtune=power8" /usr/bin/python2 setup.py  build --executable="/usr/bin/python2 -s" ; sleep 1
+# x86_64 rhel7:
+# CFLAGS="-O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic" /usr/bin/python2 setup.py  build --executable="/usr/bin/python2 -s" ; sleep 1
+#
+# "py2_install" macro:
+# CFLAGS="-O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mcpu=power8 -mtune=power8" /usr/bin/python2 setup.py  install -O1 --skip-build --root /home/dlspark/rpmbuild/BUILDROOT/%{name}-%{version}-%{release}.ppc64le 
+dep_pkgs_build_v3.2 := autoconf automake epel-rpm-macros
+#dep_pkgs_build_v3.2 += emacs emacs-el
 dep_pkgs_build_v3.2 += gcc-c++ libtool pkgconfig zlib-devel
 dep_pkgs_build_v3.2 += python python-devel python-setuptools python-google-apputils python-six
-dep_pkgs_build_v3.2 += maven maven-local maven-plugin-bundle maven-antrun-plugin easymock2
+#dep_pkgs_build_v3.2 += maven maven-local maven-plugin-bundle maven-antrun-plugin easymock2
 
 # gtest: patch failed to patch v3.0.2, disable it.
 # easymock: version does not satisfy requirement of v3.0.2, disable it.
